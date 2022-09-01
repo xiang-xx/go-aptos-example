@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	testNetUrl = "https://fullnode.devnet.aptoslabs.com"
+	TestNetUrl = "https://fullnode.devnet.aptoslabs.com"
 	faucetUrl  = "https://faucet.devnet.aptoslabs.com"
 
 	AptosCoinType = "0x1::aptos_coin::AptosCoin"
@@ -55,7 +55,7 @@ func GetClient() *aptosclient.RestClient {
 		return c
 	}
 	var err error
-	c, err = aptosclient.Dial(context.Background(), testNetUrl)
+	c, err = aptosclient.Dial(context.Background(), TestNetUrl)
 	PanicError(err)
 	return c
 }
