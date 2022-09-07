@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/hex"
+	"fmt"
 	"go-aptos-example/base"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	transactionbuilder "github.com/coming-chat/go-aptos/transaction_builder"
 	"github.com/coming-chat/go-red-packet/redpacket"
 	"github.com/coming-chat/wallet-SDK/core/aptos"
+	"github.com/the729/lcs"
 )
 
 const (
@@ -56,6 +58,14 @@ func create(account *aptosaccount.Account, chain *aptos.Chain, abi *transactionb
 			uint64(5), uint64(100000),
 		},
 	)
+
+	bs, err := lcs.Marshal(payloadAbi)
+	base.PanicError(err)
+	fmt.Printf("%s\b", hex.EncodeToString(bs))
+	pabi := transactionbuilder.TransactionPayloadEntryFunction{}
+	lcs.Unmarshal(bs, &pabi)
+	fmt.Printf("%v\n", pabi)
+
 	base.PanicError(err)
 	client, err := chain.GetClient()
 	base.PanicError(err)
@@ -68,7 +78,7 @@ func create(account *aptosaccount.Account, chain *aptos.Chain, abi *transactionb
 		SequenceNumber:          accountData.SequenceNumber,
 		MaxGasAmount:            20000,
 		GasUnitPrice:            1,
-		Payload:                 payloadAbi,
+		Payload:                 pabi,
 		ExpirationTimestampSecs: ledgerInfo.LedgerTimestamp + 600,
 		ChainId:                 uint8(ledgerInfo.ChainId),
 	}
