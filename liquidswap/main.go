@@ -42,7 +42,7 @@ func init() {
 		Symbol:   "APTOS",
 	}
 	address2Coin[USDT] = liquidswap.Coin{
-		Decimals: 8,
+		Decimals: 6,
 		Symbol:   "USDT",
 	}
 	address2Coin[BTC] = liquidswap.Coin{
