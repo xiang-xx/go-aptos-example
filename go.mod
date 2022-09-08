@@ -3,9 +3,11 @@ module go-aptos-example
 go 1.18
 
 require (
-	github.com/coming-chat/go-aptos v0.0.0-20220902085012-d069be50e94f
+	github.com/coming-chat/go-aptos v0.0.0-20220907084835-9d6cc4fe9481
+	github.com/coming-chat/go-aptos-liquidswap v0.0.0-20220907091349-e17d3e9609f7
 	github.com/coming-chat/go-red-packet v0.0.0-20220902030324-0579bb81a0a7
-	github.com/coming-chat/wallet-SDK v0.2.7-0.20220902030225-2255084c94a9
+	github.com/coming-chat/wallet-SDK v0.2.7-0.20220907093406-5e5c449eba20
+	github.com/shopspring/decimal v1.3.1
 	github.com/the729/lcs v0.1.5
 )
 
@@ -36,7 +38,6 @@ require (
 	github.com/pierrec/xxHash v0.1.5 // indirect
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
-	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/tyler-smith/go-bip32 v1.0.0 // indirect

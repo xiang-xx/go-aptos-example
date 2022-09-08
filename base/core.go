@@ -13,6 +13,7 @@ import (
 	"github.com/coming-chat/go-aptos/aptosclient"
 	"github.com/coming-chat/go-aptos/aptostypes"
 	txBuilder "github.com/coming-chat/go-aptos/transaction_builder"
+	"github.com/coming-chat/wallet-SDK/core/aptos"
 	"github.com/the729/lcs"
 )
 
@@ -27,6 +28,10 @@ var c *aptosclient.RestClient
 
 func GetEnvAccount() (*aptosaccount.Account, error) {
 	return aptosaccount.NewAccountWithMnemonic(os.Getenv("mnemonic"))
+}
+
+func GetEnvAptosAccount() (*aptos.Account, error) {
+	return aptos.NewAccountWithMnemonic(os.Getenv("mnemonic"))
 }
 
 func GetAddress(account *aptosaccount.Account) string {
@@ -48,6 +53,10 @@ func PanicError(err error) {
 func FaucetFundAccount(address string, amount uint64) (err error) {
 	_, err = aptosclient.FaucetFundAccount(address, amount, faucetUrl)
 	return
+}
+
+func GetChain() *aptos.Chain {
+	return aptos.NewChainWithRestUrl(TestNetUrl)
 }
 
 func GetClient() *aptosclient.RestClient {
