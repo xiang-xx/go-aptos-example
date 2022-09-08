@@ -91,10 +91,10 @@ func swap(account *aptos.Account, chain *aptos.Chain, fromCoinAddress, toCoinAdd
 	}
 	fmt.Printf("x: %s, %s\ny: %s %s\n", p.CoinXReserve, xAddress, p.CoinYReserve, yAddress)
 
-	res := liquidswap.CalculateRates(fromCoin, toCoin, amount, "from", p)
+	res := liquidswap.GetAmountOut(fromCoin, toCoin, amount, p)
 	fmt.Printf("in %s: %s, out %s: %s\n", fromCoin.Symbol, amount.String(), toCoin.Name, res.String())
 
-	payload, err := liquidswap.CreateTxPayload(&liquidswap.CreateTxPayloadParams{
+	payload, err := liquidswap.CreateSwapPayload(&liquidswap.SwapParams{
 		Script:           scriptAddress + "::scripts",
 		FromCoin:         fromCoinAddress,
 		ToCoin:           toCoinAddress,

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/coming-chat/go-aptos v0.0.0-20220907084835-9d6cc4fe9481
-	github.com/coming-chat/go-aptos-liquidswap v0.0.0-20220907091349-e17d3e9609f7
+	github.com/coming-chat/go-aptos-liquidswap v0.0.0-20220908090525-9fde6b8ae19f
 	github.com/coming-chat/go-red-packet v0.0.0-20220902030324-0579bb81a0a7
 	github.com/coming-chat/wallet-SDK v0.2.7-0.20220907093406-5e5c449eba20
 	github.com/shopspring/decimal v1.3.1
