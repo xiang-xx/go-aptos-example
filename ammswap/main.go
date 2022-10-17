@@ -13,42 +13,61 @@ import (
 	transactionbuilder "github.com/coming-chat/go-aptos/transaction_builder"
 	"github.com/coming-chat/lcs"
 	"github.com/coming-chat/wallet-SDK/core/aptos"
-	"github.com/omnibtc/go-aptos-liquidswap/liquidswap"
+	"github.com/omnibtc/go-ammswap/ammswap"
 	"github.com/shopspring/decimal"
 )
 
 const (
-	swapAbiFormat = "010473776170%s0773637269707473a501205377617020657861637420636f696e2060586020666f72206174206c65617374206d696e696d756d20636f696e206059602e0a202a2060636f696e5f76616c60202d20616d6f756e74206f6620636f696e732060586020746f20737761702e0a202a2060636f696e5f6f75745f6d696e5f76616c60202d206d696e696d756d20657870656374656420616d6f756e74206f6620636f696e732060596020746f206765742e03017801790563757276650208636f696e5f76616c0210636f696e5f6f75745f6d696e5f76616c02"
+	swapAbiFormat = "010473776170%s09696e746572666163650002017801790208636f696e5f76616c0210636f696e5f6f75745f6d696e5f76616c02"
 	// swapIntoAbi
 	// 0109737761705f696e746f%s0773637269707473ab012053776170206d6178696d756d20636f696e2060586020666f7220657861637420636f696e206059602e0a202a2060636f696e5f76616c5f6d617860202d20686f77206d756368206f6620636f696e73206058602063616e206265207573656420746f206765742060596020636f696e2e0a202a2060636f696e5f6f757460202d20686f77206d756368206f6620636f696e73206059602073686f756c642062652072657475726e65642e0301780179056375727665020c636f696e5f76616c5f6d61780208636f696e5f6f757402
 
 	APTOS = "0x1::aptos_coin::AptosCoin"
-	USDT  = "0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::coins::USDT"
-	BTC   = "0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::coins::BTC"
+	USDT  = "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8::Coins::USDT"
+	XBTC  = "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8::Coins::XBTC"
 	Pool  = ""
 
-	scriptAddress = "0x4e9fce03284c0ce0b86c88dd5a46f050cad2f4f33c4cdd29d98f501868558c81" // 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::liquidity_pool::LiquidityPool<CoinA, CoinB, Pool>
-	poolAddress   = "0x8aa500cd155a6087509fa84bc7f0deed3363dd253ecb62b2f110885dacf01c67" // 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::lp::LP<CoinA, CoinB>
+	scriptAddress     = "0x870723e9a8f6d07c350e79d63655de673fb24d0695c702f479c201ab7b055f41" //
+	scriptPoolAddress = "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8"
+	poolAddress       = "0x2b73217a4de6b2fedd36c27374bff4211c1f4885770e9fb9956b57dd412c8eb5" // 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::lp::LP<CoinA, CoinB>
 )
 const upperhex = "0123456789ABCDEF"
 
 var (
-	address2Coin map[string]liquidswap.Coin
+	address2Coin map[string]ammswap.Coin
 )
 
 func init() {
-	address2Coin = make(map[string]liquidswap.Coin)
-	address2Coin[APTOS] = liquidswap.Coin{
+	address2Coin = make(map[string]ammswap.Coin)
+	address2Coin[APTOS] = ammswap.Coin{
 		Decimals: 8,
+		Name:     "APTOS",
 		Symbol:   "APTOS",
+		TokenType: ammswap.TokenType{
+			Address:    "0x1",
+			Module:     "aptos_coin",
+			StructName: "AptosCoin",
+		},
 	}
-	address2Coin[USDT] = liquidswap.Coin{
+	address2Coin[USDT] = ammswap.Coin{
 		Decimals: 6,
 		Symbol:   "USDT",
+		Name:     "USDT",
+		TokenType: ammswap.TokenType{
+			Address:    "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8",
+			Module:     "Coins",
+			StructName: "USDT",
+		},
 	}
-	address2Coin[BTC] = liquidswap.Coin{
+	address2Coin[XBTC] = ammswap.Coin{
 		Decimals: 8,
-		Symbol:   "BTC",
+		Symbol:   "XBTC",
+		Name:     "XBTC",
+		TokenType: ammswap.TokenType{
+			Address:    "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8",
+			Module:     "Coins",
+			StructName: "XBTC",
+		},
 	}
 
 	lcs.RegisterEnum(
@@ -67,12 +86,13 @@ func init() {
 
 func main() {
 	account, err := base.GetEnvAptosAccount()
+	println(account.Address())
 	base.PanicError(err)
 
 	chain := base.GetChain()
 
 	// 构造交易，预估得到的 coin，执行 swap，查看交易详情
-	swap(account, chain, APTOS, USDT, "100000")
+	swap(account, chain, USDT, XBTC, "100")
 }
 
 func swap(account *aptos.Account, chain *aptos.Chain, fromCoinAddress, toCoinAddress, fromAmount string) {
@@ -82,30 +102,26 @@ func swap(account *aptos.Account, chain *aptos.Chain, fromCoinAddress, toCoinAdd
 	fromCoin := address2Coin[fromCoinAddress]
 	toCoin := address2Coin[toCoinAddress]
 	xAddress, yAddress := fromCoinAddress, toCoinAddress
-	if !liquidswap.IsSortedSymbols(fromCoin.Symbol, toCoin.Symbol) {
+	if !ammswap.IsSortedCoin(fromCoin, toCoin) {
 		xAddress, yAddress = yAddress, xAddress
 	}
-	p := getPoolReserve(client, scriptAddress, poolAddress, xAddress, yAddress, fmt.Sprintf("%s::curves::Uncorrelated", scriptAddress))
+	p := getPoolReserve(client, scriptPoolAddress, poolAddress, xAddress, yAddress)
 	amount, b := big.NewInt(0).SetString(fromAmount, 10)
 	if !b {
 		panic("invali params")
 	}
 	fmt.Printf("x: %s, %s\ny: %s %s\n", p.CoinXReserve, xAddress, p.CoinYReserve, yAddress)
 
-	res := liquidswap.GetAmountOut(fromCoin, toCoin, amount, p)
+	res := ammswap.GetAmountOut(fromCoin, toCoin, amount, p)
 	fmt.Printf("in %s: %s, out %s: %s\n", fromCoin.Symbol, amount.String(), toCoin.Name, res.String())
 
-	payload, err := liquidswap.CreateSwapPayload(&liquidswap.SwapParams{
-		Script:           scriptAddress + "::scripts",
-		FromCoin:         fromCoinAddress,
-		ToCoin:           toCoinAddress,
-		FromAmount:       amount,
-		ToAmount:         res,
-		InteractiveToken: "from",
-		Slippage:         decimal.NewFromFloat(0.005),
-		Pool: liquidswap.Pool{
-			CurveStructType: fmt.Sprintf("%s::curves::Uncorrelated", scriptAddress),
-		},
+	payload, err := ammswap.CreateSwapPayload(&ammswap.SwapParams{
+		Script:     scriptAddress + "::scripts",
+		FromCoin:   fromCoinAddress,
+		ToCoin:     toCoinAddress,
+		FromAmount: amount,
+		ToAmount:   res,
+		Slippage:   decimal.NewFromFloat(0.005),
 	})
 	base.PanicError(err)
 
@@ -150,32 +166,24 @@ func ensureRegisterCoin(account *aptos.Account, chain *aptos.Chain, toCoinAddres
 	base.PanicError(err)
 }
 
-func getPoolReserve(client *aptosclient.RestClient, scriptAddress, poolAddress, xAddress, yAddress string, curveType string) liquidswap.PoolResource {
+func getPoolReserve(client *aptosclient.RestClient, scriptPoolAddress, poolAddress, xAddress, yAddress string) ammswap.PoolResource {
 	poolResourceType := fmt.Sprintf(
-		"%s::liquidity_pool::LiquidityPool<%s,%s,%s>",
-		scriptAddress,
+		"%s::implements::LiquidityPool<%s,%s>",
+		scriptPoolAddress,
 		xAddress, // 这两个顺序与 lp 不一致
 		yAddress,
-		curveType,
 	)
-	// /0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::liquidity_pool::LiquidityPool
-	// <0x1::aptos_coin::AptosCoin,
-	// 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::coins::USDT,
-	// 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::lp::LP
-	// <0x1::aptos_coin::AptosCoin,
-	// %200x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::coins::USDT>>
-	// poolResourceType = escapeTypes(poolResourceType)
 	resource, err := client.GetAccountResource(poolAddress, poolResourceType, 0)
 	if err != nil {
 		base.PanicError(err)
 	}
 
-	return resourceToPoolReserve(resource, true)
+	return resourceToPoolReserve(resource)
 }
 
-func resourceToPoolReserve(resource *aptostypes.AccountResource, reverse bool) liquidswap.PoolResource {
-	x := resource.Data["coin_x_reserve"].(map[string]interface{})["value"].(string)
-	y := resource.Data["coin_y_reserve"].(map[string]interface{})["value"].(string)
+func resourceToPoolReserve(resource *aptostypes.AccountResource) ammswap.PoolResource {
+	x := resource.Data["coin_x"].(map[string]interface{})["value"].(string)
+	y := resource.Data["coin_y"].(map[string]interface{})["value"].(string)
 	xint, b := big.NewInt(0).SetString(x, 10)
 	if !b {
 		base.PanicError(errors.New("invalid reserve"))
@@ -184,12 +192,9 @@ func resourceToPoolReserve(resource *aptostypes.AccountResource, reverse bool) l
 	if !b {
 		base.PanicError(errors.New("invalid reserve"))
 	}
-	s := liquidswap.PoolResource{
+	s := ammswap.PoolResource{
 		CoinXReserve: xint,
 		CoinYReserve: yint,
-	}
-	if reverse {
-		s.CoinXReserve, s.CoinYReserve = s.CoinYReserve, s.CoinXReserve
 	}
 	return s
 }

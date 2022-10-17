@@ -1,0 +1,3 @@
+swapNΞ(LΰΈlέZFπPΚÒτσ<Lέ)ΩPhUscripts¥ Swap exact coin `X` for at least minimum coin `Y`.
+ * `coin_val` - amount of coins `X` to swap.
+ * `coin_out_min_val` - minimum expected amount of coins `Y` to get.xycurvecoin_valcoin_out_min_val

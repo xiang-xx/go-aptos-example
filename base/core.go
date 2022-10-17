@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	TestNetUrl = "https://fullnode.devnet.aptoslabs.com"
+	TestNetUrl = "https://fullnode.testnet.aptoslabs.com"
 	faucetUrl  = "https://faucet.devnet.aptoslabs.com"
 
 	AptosCoinType = "0x1::aptos_coin::AptosCoin"
