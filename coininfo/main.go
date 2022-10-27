@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	client, err := aptosclient.Dial(context.Background(), "https://fullnode.testnet.aptoslabs.com")
+	client, err := aptosclient.Dial(context.Background(), "https://fullnode.mainnet.aptoslabs.com")
 	if err != nil {
 		panic(err)
 	}

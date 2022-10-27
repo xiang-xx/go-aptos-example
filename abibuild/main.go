@@ -6,8 +6,20 @@ import (
 	"fmt"
 )
 
-//go:embed amm/swap.abi
-var swap []byte
+// //go:embed aggr/one_step_route.abi
+// var one []byte
+
+// //go:embed aggr/two_step_route.abi
+// var two []byte
+
+// //go:embed aggr/three_step_route.abi
+// var three []byte
+
+//go:embed sodiamond/so_swap_via_wormhole.abi
+var sowormhole []byte
+
+////go:embed amm/swap.abi
+//var swap []byte
 
 // //go:embed lp/swap_into.abi
 // var swap_into []byte
@@ -80,9 +92,16 @@ func main() {
 
 	// fmt.Printf("%s\n", hex.EncodeToString(testclose))
 
-	fmt.Printf("%s\n", hex.EncodeToString(swap))
+	//	fmt.Printf("%s\n", hex.EncodeToString(swap))
 	// fmt.Printf("%s\n", hex.EncodeToString(swap_into))
 
+	// fmt.Printf("%s\n", hex.EncodeToString(one))
+	// println("======")
+	// fmt.Printf("%s\n", hex.EncodeToString(two))
+	// println("======")
+	// fmt.Printf("%s\n", hex.EncodeToString(three))
+	// println("======")
+	fmt.Printf("%s\n", hex.EncodeToString(sowormhole))
 }
 
 // {

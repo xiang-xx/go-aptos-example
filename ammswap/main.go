@@ -23,13 +23,13 @@ const (
 	// 0109737761705f696e746f%s0773637269707473ab012053776170206d6178696d756d20636f696e2060586020666f7220657861637420636f696e206059602e0a202a2060636f696e5f76616c5f6d617860202d20686f77206d756368206f6620636f696e73206058602063616e206265207573656420746f206765742060596020636f696e2e0a202a2060636f696e5f6f757460202d20686f77206d756368206f6620636f696e73206059602073686f756c642062652072657475726e65642e0301780179056375727665020c636f696e5f76616c5f6d61780208636f696e5f6f757402
 
 	APTOS = "0x1::aptos_coin::AptosCoin"
-	USDT  = "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8::Coins::USDT"
-	XBTC  = "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8::Coins::XBTC"
+	USDC  = "0xcb0b45f3b49a6ab957facd2029ee0cd6720bb12907877d2f499946a7fd8f8344::testnet_coins::TestUSDC"
+	BTC   = "0xcb0b45f3b49a6ab957facd2029ee0cd6720bb12907877d2f499946a7fd8f8344::testnet_coins::TestBTC"
 	Pool  = ""
 
-	scriptAddress     = "0x870723e9a8f6d07c350e79d63655de673fb24d0695c702f479c201ab7b055f41" //
-	scriptPoolAddress = "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8"
-	poolAddress       = "0x2b73217a4de6b2fedd36c27374bff4211c1f4885770e9fb9956b57dd412c8eb5" // 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::lp::LP<CoinA, CoinB>
+	scriptAddress     = "0xf69f9ec8348a803e2822c9f90950121130539f2a426dfb86e82d67e3613e6d6b" //
+	scriptPoolAddress = "0xf69f9ec8348a803e2822c9f90950121130539f2a426dfb86e82d67e3613e6d6b"
+	poolAddress       = "0xe98445b5e7489d1a4afee94940ca4c40e1f6c87a59c3b392e4744614af209de4" // 0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::lp::LP<CoinA, CoinB>
 )
 const upperhex = "0123456789ABCDEF"
 
@@ -49,24 +49,24 @@ func init() {
 			StructName: "AptosCoin",
 		},
 	}
-	address2Coin[USDT] = ammswap.Coin{
-		Decimals: 6,
-		Symbol:   "USDT",
-		Name:     "USDT",
+	address2Coin[USDC] = ammswap.Coin{
+		Decimals: 8,
+		Symbol:   "testUSDC",
+		Name:     "USD Coin",
 		TokenType: ammswap.TokenType{
-			Address:    "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8",
-			Module:     "Coins",
-			StructName: "USDT",
+			Address:    "0xcb0b45f3b49a6ab957facd2029ee0cd6720bb12907877d2f499946a7fd8f8344",
+			Module:     "testnet_coins",
+			StructName: "TestUSDC",
 		},
 	}
-	address2Coin[XBTC] = ammswap.Coin{
+	address2Coin[BTC] = ammswap.Coin{
 		Decimals: 8,
-		Symbol:   "XBTC",
-		Name:     "XBTC",
+		Symbol:   "testBTC",
+		Name:     "Bitcoin",
 		TokenType: ammswap.TokenType{
-			Address:    "0xd415c5143d4f9752e462ab3476c567fdc0e2f0fb02f779d333e819c0e8624ea8",
-			Module:     "Coins",
-			StructName: "XBTC",
+			Address:    "0xcb0b45f3b49a6ab957facd2029ee0cd6720bb12907877d2f499946a7fd8f8344",
+			Module:     "testnet_coins",
+			StructName: "TestBTC",
 		},
 	}
 
@@ -92,7 +92,7 @@ func main() {
 	chain := base.GetChain()
 
 	// 构造交易，预估得到的 coin，执行 swap，查看交易详情
-	swap(account, chain, USDT, XBTC, "100")
+	swap(account, chain, APTOS, BTC, "1000000")
 }
 
 func swap(account *aptos.Account, chain *aptos.Chain, fromCoinAddress, toCoinAddress, fromAmount string) {
@@ -116,7 +116,7 @@ func swap(account *aptos.Account, chain *aptos.Chain, fromCoinAddress, toCoinAdd
 	fmt.Printf("in %s: %s, out %s: %s\n", fromCoin.Symbol, amount.String(), toCoin.Name, res.String())
 
 	payload, err := ammswap.CreateSwapPayload(&ammswap.SwapParams{
-		Script:     scriptAddress + "::scripts",
+		Script:     scriptAddress + "::interface",
 		FromCoin:   fromCoinAddress,
 		ToCoin:     toCoinAddress,
 		FromAmount: amount,

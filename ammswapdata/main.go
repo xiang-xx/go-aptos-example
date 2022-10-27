@@ -1,13 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"go-aptos-example/base"
 	"io/ioutil"
 	"strings"
 
 	"github.com/coming-chat/go-aptos/aptosclient"
 )
+
+const RpcUrl = "https://aptos.coming.chat"
 
 type CoinInfo struct {
 	Address  string
@@ -20,8 +22,9 @@ type Connection struct {
 	coins [2]CoinInfo
 }
 
-const PairPrefix = "0xf69f9ec8348a803e2822c9f90950121130539f2a426dfb86e82d67e3613e6d6b::implements::LiquidityPool"
-const poolAddress = "0xf69f9ec8348a803e2822c9f90950121130539f2a426dfb86e82d67e3613e6d6b"
+const PairPrefix = "0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::liquidity_pool::LiquidityPool"
+const poolAddress = "0x05a97986a9d031c4567e15b797be516910cfcb4156312482efc6a19c0a30c948"
+const poolName = "lp"
 
 var symbolToLogo map[string]string
 
@@ -37,7 +40,10 @@ func init() {
 }
 
 func main() {
-	client := base.GetClient()
+	client, err := aptosclient.Dial(context.Background(), RpcUrl)
+	if err != nil {
+		panic(err)
+	}
 
 	res, err := client.GetAccountResources(poolAddress)
 	if err != nil {
@@ -72,7 +78,8 @@ func main() {
 	values`
 	for _, conn := range connections {
 		conSql += fmt.Sprintf(`
-		('%s', '%s', '%s', '%s', 3, 1, '{"poolInfos":[{"address":"%s", "name":"amm"}]}'),`, network, conn.coins[0].Name, network, conn.coins[1].Name, poolAddress)
+		('%s', '%s', '%s', '%s', 3, 1, '{"poolInfos":[{"address":"%s", "name":"%s"}]}'),`,
+			network, conn.coins[0].Name, network, conn.coins[1].Name, poolAddress, poolName)
 	}
 	conSql = conSql[:len(conSql)-1] // 去掉最后一个 ,
 	conSql += ";"
@@ -124,7 +131,16 @@ func getCoinsByPairAddress(address string, client *aptosclient.RestClient) ([2]C
 	pool = pool[1 : len(pool)-1] // 去掉 <>
 	idx := strings.Index(pool, ", ")
 	coin1 := pool[:idx]
-	coin2 := pool[idx+2:]
+	nextPoolStr := pool[idx+2:]
+
+	idx = strings.Index(nextPoolStr, ", ")
+	coin2 := ""
+	if idx == -1 {
+		coin2 = nextPoolStr
+	} else {
+		coin2 = nextPoolStr[:idx]
+	}
+
 	name, symbol, decimals := coinInfo(coin1, client)
 	coin1Info := CoinInfo{
 		Address:  coin1,
